@@ -2,6 +2,7 @@
 #include<unordered_set>
 #include <iostream>
 #include <queue>
+#include "heuristic_val.h"
 
 using namespace std;
 
@@ -15,6 +16,7 @@ struct Problem_State {
 };
 struct Problem_StateComparator {
     bool operator()(const Problem_State& s1, const Problem_State& s2) const {
+        if(s1.cost == s2.cost) s1.depth < s2.depth;
         return s1.cost > s2.cost;
     }
 };
@@ -80,7 +82,7 @@ void printState(Problem_State currState) {
     }
     cout << "\n";
 }
-vector<Problem_State> generateSuccessor(Problem_State currState) {
+vector<Problem_State> generateSuccessor(Problem_State currState,int queueing_fun) {
     vector<Problem_State> newStateList;
     //Finding empty tile(0)
     int oldX0 = -1,oldY0 = -1;
@@ -104,20 +106,21 @@ vector<Problem_State> generateSuccessor(Problem_State currState) {
             swap(newState[oldX0][oldY0],newState[newX0][newY0]);
             vector<pair<int, int>> newPath = currState.path;
             newPath.push_back({ newX0, newY0 });
-            newStateList.push_back(Problem_State(newState,currState.cost+1,currState.depth+1,newPath));
+            newStateList.push_back(Problem_State(newState,currState.cost+calculateHeuristic(newState,queueing_fun),currState.depth+1,newPath));
         }
     }
-     cout << "Generated successor states:" << "\n";
-    for (const auto& successor : newStateList) {
-        printState(successor);
-    }
+    //  cout << "Generated successor states:" << "\n";
+    // for (const auto& successor : newStateList) {
+    //     printState(successor);
+    // }
     return newStateList;
 }
 
 void generalSearch(vector<vector<int>> problem,int queueing_fun) {
     priority_queue<Problem_State,vector<Problem_State>,Problem_StateComparator> pqueue;
     unordered_set<vector<vector<int>>, VectorHash> visited;
-    pqueue.push(Problem_State(problem,0,0,{})); //nodes = make-queue(make-Node(problem.initial state))
+    int h = calculateHeuristic(problem,queueing_fun); //Calculate h(n) hueristic cost according to the algoritm
+    pqueue.push(Problem_State(problem,h,0,{})); //nodes = make-queue(make-Node(problem.initial state))
     while(!pqueue.empty()) {
         Problem_State currState = pqueue.top();
         pqueue.pop();
@@ -127,17 +130,16 @@ void generalSearch(vector<vector<int>> problem,int queueing_fun) {
         if(isGoalState(currState.problem)) {
             cout << "Generated answer states:" << "\n";
             
-            printState(currState);
+          printState(currState);
             return;
         }
-        vector<Problem_State> successorList = generateSuccessor(currState);
-        cout<<"\nSuccessorList Size ::"<<successorList.size();
+        vector<Problem_State> successorList = generateSuccessor(currState,queueing_fun);
+       // cout<<"\nSuccessorList Size ::"<<successorList.size();
         for(const auto& node: successorList) {
 
             if(visited.count(node.problem)) {
-                cout << "\nGenerated visited states:" << "\n";
-            
-                printState(node);
+                //cout << "\nGenerated visited states:" << "\n";         
+               // printState(node);
                 continue;
             }
             

@@ -15,9 +15,9 @@ int main() {
     vector<vector<int>> puzzle;
     if(choice == 1){
         puzzle = {
-            {1, 2, 3},
-            {4, 5, 6},
-            {0, 7, 8} // 0 represents the empty tile
+          {1, 2,3},
+          {4, 5, 6},
+          {0, 7, 8}   // 0 represents the empty tile
         };
     } else if(choice == 2){  
         size = inputBoard(puzzle);
